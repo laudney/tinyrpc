@@ -1,19 +1,18 @@
-__author__ = 'laudney'
-
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .. import RPCBatchProtocol, RPCRequest, RPCResponse, RPCErrorResponse, \
-    InvalidRequestError, MethodNotFoundError, ServerError, \
-    InvalidReplyError, RPCError, RPCBatchRequest, RPCBatchResponse
+import ujson as json
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger('StratumRPCProtocol')
+
+
+from .. import RPCBatchProtocol, RPCRequest, RPCResponse, RPCErrorResponse, \
+    InvalidRequestError, MethodNotFoundError, InvalidReplyError
 
 from .jsonrpc import FixedErrorMessageMixin, JSONRPCInvalidRequestError, \
     JSONRPCMethodNotFoundError, JSONRPCServerError, JSONRPCParseError, JSONRPCInvalidParamsError
-
-
-import ujson as json
 
 
 class StratumUnknownError(FixedErrorMessageMixin, InvalidRequestError):
@@ -55,7 +54,9 @@ class StratumRPCSuccessResponse(RPCResponse):
         }
 
     def serialize(self):
-        return json.dumps(self._to_dict())
+        s = json.dumps(self._to_dict())
+        log.debug(s)
+        return s
 
 
 # hardcode traceback to be null for now
@@ -68,7 +69,9 @@ class StratumRPCErrorResponse(RPCErrorResponse):
         }
 
     def serialize(self):
-        return json.dumps(self._to_dict())
+        s = json.dumps(self._to_dict())
+        log.debug(s)
+        return s
 
 
 def _get_code_and_message(error):
@@ -130,7 +133,9 @@ class StratumRPCRequest(RPCRequest):
         return jdata
 
     def serialize(self):
-        return json.dumps(self._to_dict())
+        s = json.dumps(self._to_dict())
+        log.debug(s)
+        return s
 
 
 class StratumRPCProtocol(RPCBatchProtocol):
