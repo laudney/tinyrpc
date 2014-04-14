@@ -5,7 +5,7 @@ from .. import RPCBatchProtocol, RPCRequest, RPCResponse, RPCErrorResponse, \
     InvalidRequestError, MethodNotFoundError, ServerError, \
     InvalidReplyError, RPCError, RPCBatchRequest, RPCBatchResponse
 
-import json
+import ujson as json
 
 
 class FixedErrorMessageMixin(object):
