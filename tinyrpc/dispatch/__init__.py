@@ -95,7 +95,7 @@ class RPCDispatcher(object):
             results = [self._dispatch(req) for req in request]
 
             response = request.create_batch_response()
-            if response != None:
+            if response is not None:
                 response.extend(results)
 
             return response
@@ -113,7 +113,7 @@ class RPCDispatcher(object):
             try:
                 result = method(*request.args, **request.kwargs)
             except Exception as e:
-                # an error occured within the method, return it
+                # an error occurred within the method, return it
                 return request.error_respond(e)
 
             # respond with result

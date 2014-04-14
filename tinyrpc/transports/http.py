@@ -32,7 +32,6 @@ class HttpPostClientTransport(ClientTransport):
             return r.content
 
 
-
 class HttpWebSocketClientTransport(ClientTransport):
     """HTTP WebSocket based client transport.
 

@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .. import RPCBatchProtocol, RPCRequest, RPCResponse, RPCErrorResponse,\
-               InvalidRequestError, MethodNotFoundError, ServerError,\
-               InvalidReplyError, RPCError, RPCBatchRequest, RPCBatchResponse
+from .. import RPCBatchProtocol, RPCRequest, RPCResponse, RPCErrorResponse, \
+    InvalidRequestError, MethodNotFoundError, ServerError, \
+    InvalidReplyError, RPCError, RPCBatchRequest, RPCBatchResponse
 
 import json
+
 
 class FixedErrorMessageMixin(object):
     def __init__(self, *args, **kwargs):
@@ -20,7 +21,6 @@ class FixedErrorMessageMixin(object):
         response.unique_id = None
         response._jsonrpc_error_code = self.jsonrpc_error_code
         return response
-
 
 
 class JSONRPCParseError(FixedErrorMessageMixin, InvalidRequestError):
@@ -137,7 +137,7 @@ class JSONRPCRequest(RPCRequest):
             jdata['params'] = self.args
         if self.kwargs:
             jdata['params'] = self.kwargs
-        if self.unique_id != None:
+        if self.unique_id is not None:
             jdata['id'] = self.unique_id
         return jdata
 
@@ -154,7 +154,7 @@ class JSONRPCBatchRequest(RPCBatchRequest):
         for request in self:
             if isinstance(request, Exception):
                 return True
-            if request.unique_id != None:
+            if request.unique_id is not None:
                 return True
 
         return False
@@ -165,7 +165,7 @@ class JSONRPCBatchRequest(RPCBatchRequest):
 
 class JSONRPCBatchResponse(RPCBatchResponse):
     def serialize(self):
-        return json.dumps([resp._to_dict() for resp in self if resp != None])
+        return json.dumps([resp._to_dict() for resp in self if resp is not None])
 
 
 class JSONRPCProtocol(RPCBatchProtocol):
@@ -190,8 +190,7 @@ class JSONRPCProtocol(RPCBatchProtocol):
 
     def create_request(self, method, args=None, kwargs=None, one_way=False):
         if args and kwargs:
-            raise InvalidRequestError('Does not support args and kwargs at '\
-                                      'the same time')
+            raise InvalidRequestError('Does not support args and kwargs at the same time')
 
         request = JSONRPCRequest()
 
@@ -280,7 +279,7 @@ class JSONRPCProtocol(RPCBatchProtocol):
         request.unique_id = req.get('id', None)
 
         params = req.get('params', None)
-        if params != None:
+        if params is not None:
             if isinstance(params, list):
                 request.args = req['params']
             elif isinstance(params, dict):

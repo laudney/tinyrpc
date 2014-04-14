@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 class RPCError(Exception):
-    """Base class for all excetions thrown by :py:mod:`tinyrpc`."""
+    """Base class for all exceptions thrown by :py:mod:`tinyrpc`."""
 
 
 class BadRequestError(RPCError):
@@ -12,7 +13,7 @@ class BadRequestError(RPCError):
     def error_respond(self):
         """Create :py:class:`~tinyrpc.RPCErrorResponse` to respond the error.
 
-        :return: A error responce instance or ``None``, if the protocol decides
+        :return: A error response instance or ``None``, if the protocol decides
                  to drop the error silently."""
         raise RuntimeError('Not implemented')
 
@@ -37,4 +38,4 @@ class MethodNotFoundError(RPCError):
 
 
 class ServerError(RPCError):
-    """An internal error in the RPC system occured."""
+    """An internal error in the RPC system occurred."""

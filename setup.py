@@ -18,5 +18,5 @@ setup(
     author='Marc Brinkmann',
     author_email='git@marcbrinkmann.de',
     url='http://github.com/mbr/tinyrpc',
-    license='MIT',
+    license='MIT', requires=['gevent', 'werkzeug', 'requests'],
 )

@@ -32,8 +32,8 @@ class WsgiServerTransport(ServerTransport):
     :param allow_origin: The ``Access-Control-Allow-Origin`` header. Defaults
                          to ``*`` (so change it if you need actual security).
     """
-    def __init__(self, max_content_length=4096, queue_class=Queue.Queue,
-                       allow_origin='*'):
+
+    def __init__(self, max_content_length=4096, queue_class=Queue.Queue, allow_origin='*'):
         self._queue_class = queue_class
         self.messages = queue_class()
         self.max_content_length = max_content_length
@@ -65,8 +65,7 @@ class WsgiServerTransport(ServerTransport):
         access_control_headers = {
             'Access-Control-Allow-Methods': 'POST',
             'Access-Control-Allow-Origin': self.allow_origin,
-            'Access-Control-Allow-Headers': \
-                'Content-Type, X-Requested-With, Accept, Origin'
+            'Access-Control-Allow-Headers': 'Content-Type, X-Requested-With, Accept, Origin'
         }
 
         if request.method == 'OPTIONS':

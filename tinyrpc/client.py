@@ -23,15 +23,14 @@ class RPCClient(object):
         response = self.protocol.parse_reply(reply)
 
         if hasattr(response, 'error'):
-            raise RPCError('Error calling remote procedure: %s' %\
-                           response.error)
+            raise RPCError('Error calling remote procedure: %s' % response.error)
 
         return response
 
     def call(self, method, args, kwargs, one_way=False):
         """Calls the requested method and returns the result.
 
-        If an error occured, an :py:class:`~tinyrpc.exc.RPCError` instance
+        If an error occurred, an :py:class:`~tinyrpc.exc.RPCError` instance
         is raised.
 
         :param method: Name of the method to call.
@@ -83,9 +82,9 @@ class RPCProxy(object):
         name ``name`` on the client associated with the proxy.
         """
         proxy_func = lambda *args, **kwargs: self.client.call(
-                         self.prefix + name,
-                         args,
-                         kwargs,
-                         one_way=self.one_way
-                     )
+            self.prefix + name,
+            args,
+            kwargs,
+            one_way=self.one_way
+        )
         return proxy_func

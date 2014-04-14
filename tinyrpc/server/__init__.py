@@ -5,6 +5,7 @@
 # FIXME: needs checks for out-of-order, concurrency, etc as attributes
 from tinyrpc.exc import RPCError
 
+
 class RPCServer(object):
     """High level RPC server.
 
@@ -42,7 +43,7 @@ class RPCServer(object):
     def receive_one_message(self):
         context, message = self.transport.receive_message()
 
-        # assuming protocol is threadsafe and dispatcher is theadsafe, as
+        # assuming protocol is threadsafe and dispatcher is threadsafe, as
         # long as its immutable
 
         def handle_message(context, message):

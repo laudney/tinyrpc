@@ -2,6 +2,7 @@
 
 from ..exc import *
 
+
 class RPCRequest(object):
     unique_id = None
     """A unique ID to remember the request by. Protocol specific, may or
