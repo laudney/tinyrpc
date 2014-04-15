@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 import gevent
 import gevent.queue
 from gevent.server import StreamServer
+from gevent import monkey
+monkey.patch_all()
+
 from tinyrpc.protocols.stratum import StratumRPCProtocol
 from tinyrpc.transports.socket import StreamServerTransport
 from tinyrpc.server.gevent import RPCServerGreenlets
@@ -12,7 +18,6 @@ from tinyrpc.dispatch import RPCDispatcher
 dispatcher = RPCDispatcher()
 transport = StreamServerTransport(queue_class=gevent.queue.Queue)
 
-# start wsgi server as a background-greenlet
 stream_server = StreamServer(('127.0.0.1', 5000), transport.handle)
 gevent.spawn(stream_server.serve_forever)
 

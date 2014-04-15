@@ -50,7 +50,7 @@ class HttpWebSocketClientTransport(ClientTransport):
         self.ws = websocket.create_connection(self.endpoint, **kwargs)
 
     def send_message(self, message, expect_reply=True):
-        if not isinstance(message, str):
+        if not isinstance(message, basestring):
             raise TypeError('str expected')
         self.ws.send(message)
         r = self.ws.recv()

@@ -1,5 +1,6 @@
 import Queue
-from . import ServerTransport
+import gevent
+from . import ServerTransport, ClientTransport
 
 
 class StreamServerTransport(ServerTransport):
@@ -44,7 +45,7 @@ class StreamServerTransport(ServerTransport):
         The reply will then be sent to the client being handled and handle will
         return.
         """
-        msg = sock.makefile().read()
+        msg = sock.makefile().readline()
         # create new context
         context = self._queue_class()
         self.messages.put((context, msg))
@@ -52,3 +53,36 @@ class StreamServerTransport(ServerTransport):
         # ...and send the reply
         response = context.get()
         yield response
+
+
+class StreamClientTransport(ClientTransport):
+    """TCP socket based client transport.
+
+    Requires :py:mod:`websocket-python`. Submits messages to a server using the body of
+    an ``HTTP`` ``WebSocket`` message. Replies are taken from the response of the websocket.
+
+    The connection is establish on the ``__init__`` because the protocol is connection oriented,
+    you need to close the connection calling the close method.
+
+    :param endpoint: The URL to connect the websocket.
+    :param kwargs: Additional parameters for :py:func:`websocket.send`.
+    """
+    def __init__(self, endpoint, **kwargs):
+        self.endpoint = endpoint
+        self.request_kwargs = kwargs
+        self.sock = gevent.socket.create_connection(self.endpoint, **kwargs)
+
+    def send_message(self, message, expect_reply=True):
+        if not isinstance(message, basestring):
+            raise TypeError('str expected')
+
+        f = self.sock.makefile()
+        f.write(message)
+        f.flush()
+        if expect_reply:
+            r = f.read()
+            return r
+
+    def close(self):
+        if self.sock is not None:
+            self.sock.close()

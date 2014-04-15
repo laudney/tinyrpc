@@ -4,7 +4,6 @@
 import ujson as json
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger('StratumRPCProtocol')
 
 
@@ -169,6 +168,7 @@ class StratumRPCProtocol(RPCBatchProtocol):
 
     def parse_reply(self, data):
         try:
+            log.debug(data)
             rep = json.loads(data)
         except Exception as e:
             raise InvalidReplyError(e)
@@ -198,6 +198,7 @@ class StratumRPCProtocol(RPCBatchProtocol):
 
     def parse_request(self, data):
         try:
+            log.debug(data)
             req = json.loads(data)
         except Exception as e:
             raise JSONRPCParseError()
