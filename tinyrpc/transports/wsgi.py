@@ -13,7 +13,7 @@ class WsgiServerTransport(ServerTransport):
 
     Requires :py:mod:`werkzeug`.
 
-    Due to the nature of WSGI, this transport has a few pecularities: It must
+    Due to the nature of WSGI, this transport has a few peculiarities: It must
     be run in a thread, greenlet or some other form of concurrent execution
     primitive.
 
