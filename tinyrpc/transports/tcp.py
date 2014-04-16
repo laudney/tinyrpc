@@ -1,5 +1,6 @@
 import Queue
 import gevent
+from gevent import socket
 from . import ServerTransport, ClientTransport
 
 
@@ -22,6 +23,9 @@ class StreamServerTransport(ServerTransport):
     """
 
     def __init__(self, queue_class=Queue.Queue):
+        self._config_buffer = 4096
+        self._config_timeout = 5
+        self._socket_error = False
         self._queue_class = queue_class
         self.messages = queue_class()
 
@@ -34,6 +38,19 @@ class StreamServerTransport(ServerTransport):
 
         context.put(reply)
 
+    def _get_data(self, sock):
+        """ Retrieves a data chunk from the socket. """
+        sock_error = False
+        try:
+            data = sock.recv(self._config_buffer)
+        except socket.timeout:
+            data = None
+        except socket.error:
+            sock_error = True
+            data = None
+
+        return data, sock_error
+
     def handle(self, sock, address):
         """StreamServer handler function.
 
@@ -45,14 +62,28 @@ class StreamServerTransport(ServerTransport):
         The reply will then be sent to the client being handled and handle will
         return.
         """
-        msg = sock.makefile().readline()
-        # create new context
-        context = self._queue_class()
-        self.messages.put((context, msg))
 
-        # ...and send the reply
-        response = context.get()
-        yield response
+        sock.settimeout(self._config_timeout)
+
+        chunks = []
+        while True:
+            data, sock_error = self._get_data(sock)
+            if not data:
+                break
+            chunks.append(data)
+            if len(data) < self._config_buffer:
+                break
+
+        msg = ''.join(chunks)
+        if sock_error:
+            sock.close()
+        else:
+            # create new context
+            context = self._queue_class()
+            self.messages.put((context, msg))
+            # ...and send the reply
+            response = context.get()
+            sock.send(response)
 
 
 class StreamClientTransport(ClientTransport):
@@ -68,20 +99,32 @@ class StreamClientTransport(ClientTransport):
     :param kwargs: Additional parameters for :py:func:`websocket.send`.
     """
     def __init__(self, endpoint, **kwargs):
+        self._config_timeout = 5
+        self._config_buffer = 4096
         self.endpoint = endpoint
         self.request_kwargs = kwargs
         self.sock = gevent.socket.create_connection(self.endpoint, **kwargs)
+        self.sock.settimeout(self._config_timeout)
 
     def send_message(self, message, expect_reply=True):
         if not isinstance(message, basestring):
             raise TypeError('str expected')
 
-        f = self.sock.makefile()
-        f.write(message)
-        f.flush()
+        self.sock.send(message)
         if expect_reply:
-            r = f.read()
-            return r
+            chunks = []
+            while True:
+                try:
+                    data = self.sock.recv(self._config_buffer)
+                except socket.timeout:
+                    break
+                if not data:
+                    break
+                chunks.append(data)
+                if len(data) < self._config_buffer:
+                    break
+            response = ''.join(chunks)
+            return response
 
     def close(self):
         if self.sock is not None:

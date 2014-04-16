@@ -11,7 +11,7 @@ from gevent import monkey
 monkey.patch_all()
 
 from tinyrpc.protocols.stratum import StratumRPCProtocol
-from tinyrpc.transports.socket import StreamServerTransport
+from tinyrpc.transports.tcp import StreamServerTransport
 from tinyrpc.server.gevent import RPCServerGreenlets
 from tinyrpc.dispatch import RPCDispatcher
 

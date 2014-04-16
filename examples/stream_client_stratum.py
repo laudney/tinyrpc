@@ -5,7 +5,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 from tinyrpc.protocols.stratum import StratumRPCProtocol
-from tinyrpc.transports.socket import StreamClientTransport
+from tinyrpc.transports.tcp import StreamClientTransport
 from tinyrpc import RPCClient
 
 
