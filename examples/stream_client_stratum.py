@@ -18,5 +18,7 @@ remote_server = rpc_client.get_proxy()
 
 # call a method called 'reverse_string' with a single string argument
 result = remote_server.reverse_string('Hello, World!')
+print "Server answered:", result
 
+result = remote_server.reverse_string('Goodbye, World!')
 print "Server answered:", result

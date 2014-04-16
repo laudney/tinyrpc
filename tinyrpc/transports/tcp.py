@@ -1,3 +1,6 @@
+import logging
+log = logging.getLogger('StreamTransport')
+
 import Queue
 import gevent
 from gevent import socket
@@ -24,7 +27,7 @@ class StreamServerTransport(ServerTransport):
 
     def __init__(self, queue_class=Queue.Queue):
         self._config_buffer = 4096
-        self._config_timeout = 5
+        self._config_timeout = 90
         self._socket_error = False
         self._queue_class = queue_class
         self.messages = queue_class()
@@ -38,18 +41,35 @@ class StreamServerTransport(ServerTransport):
 
         context.put(reply)
 
-    def _get_data(self, sock):
+    def _get_data(self, sock, address):
         """ Retrieves a data chunk from the socket. """
         sock_error = False
         try:
             data = sock.recv(self._config_buffer)
         except socket.timeout:
+            sock_error = True
             data = None
+            log.debug('StreamServerTransport:socket timeout from %s', address)
         except socket.error:
             sock_error = True
             data = None
+            log.debug('StreamServerTransport:socket error from %s', address)
 
         return data, sock_error
+
+    def _get_msg(self, sock, address):
+        sock_error = False
+        chunks = []
+        while True:
+            data, sock_error = self._get_data(sock, address)
+            if not data:
+                break
+            chunks.append(data)
+            if len(data) < self._config_buffer:
+                break
+
+        msg = ''.join(chunks)
+        return msg, sock_error
 
     def handle(self, sock, address):
         """StreamServer handler function.
@@ -65,25 +85,22 @@ class StreamServerTransport(ServerTransport):
 
         sock.settimeout(self._config_timeout)
 
-        chunks = []
         while True:
-            data, sock_error = self._get_data(sock)
-            if not data:
-                break
-            chunks.append(data)
-            if len(data) < self._config_buffer:
-                break
+            msg, sock_error = self._get_msg(sock, address)
+            if msg and len(msg):
+                log.debug('StreamServerTransport:%s', msg)
 
-        msg = ''.join(chunks)
-        if sock_error:
-            sock.close()
-        else:
-            # create new context
-            context = self._queue_class()
-            self.messages.put((context, msg))
-            # ...and send the reply
-            response = context.get()
-            sock.send(response)
+                # create new context
+                context = self._queue_class()
+                self.messages.put((context, msg))
+                # ...and send the reply
+                response = context.get()
+                sock.send(response)
+
+            if sock_error:
+                log.debug('')
+                sock.close()
+                break
 
 
 class StreamClientTransport(ClientTransport):
@@ -117,6 +134,7 @@ class StreamClientTransport(ClientTransport):
                 try:
                     data = self.sock.recv(self._config_buffer)
                 except socket.timeout:
+                    log.debug('StreamClientTransport:socket timeout from server')
                     break
                 if not data:
                     break

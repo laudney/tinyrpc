@@ -53,7 +53,7 @@ class StratumRPCSuccessResponse(RPCResponse):
         }
 
     def serialize(self):
-        s = json.dumps(self._to_dict())
+        s = json.dumps(self._to_dict()) + '\n'
         log.debug(s)
         return s
 
@@ -68,7 +68,7 @@ class StratumRPCErrorResponse(RPCErrorResponse):
         }
 
     def serialize(self):
-        s = json.dumps(self._to_dict())
+        s = json.dumps(self._to_dict()) + '\n'
         log.debug(s)
         return s
 
@@ -132,7 +132,7 @@ class StratumRPCRequest(RPCRequest):
         return jdata
 
     def serialize(self):
-        s = json.dumps(self._to_dict())
+        s = json.dumps(self._to_dict()) + '\n'
         log.debug(s)
         return s
 
@@ -169,6 +169,7 @@ class StratumRPCProtocol(RPCBatchProtocol):
     def parse_reply(self, data):
         try:
             log.debug(data)
+            data = data.strip()
             rep = json.loads(data)
         except Exception as e:
             raise InvalidReplyError(e)
@@ -199,6 +200,7 @@ class StratumRPCProtocol(RPCBatchProtocol):
     def parse_request(self, data):
         try:
             log.debug(data)
+            data = data.strip()
             req = json.loads(data)
         except Exception as e:
             raise JSONRPCParseError()
