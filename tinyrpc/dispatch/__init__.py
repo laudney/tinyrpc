@@ -36,6 +36,8 @@ class RPCDispatcher(object):
 
     def __init__(self):
         self.method_map = {}
+        self.method_help = {}
+        self.method_params = {}
         self.subdispatchers = {}
 
     def add_subdispatch(self, dispatcher, prefix=''):
@@ -65,6 +67,12 @@ class RPCDispatcher(object):
 
         self.method_map[name] = f
 
+        if hasattr(f, '_rpc_help_text'):
+            self.method_help[name] = f._rpc_help_text
+
+        if hasattr(f, '_rpc_params'):
+            self.method_params[name] = f._rpc_params
+
     def dispatch(self, request):
         """Fully handle request.
 
@@ -77,7 +85,7 @@ class RPCDispatcher(object):
         If a method isn't found, a :py:exc:`~tinyrpc.exc.MethodNotFoundError`
         response will be returned. If any error occurs outside of the requested
         method, a :py:exc:`~tinyrpc.exc.ServerError` without any error
-        information will be returend.
+        information will be returned.
 
         If the method is found and called but throws an exception, the
         exception thrown is used as a response instead. This is the only case
